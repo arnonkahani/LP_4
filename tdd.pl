@@ -1,4 +1,4 @@
-% Testing
+% We used this file to test our code during implementation
 
 %should pass
 test_instance(1,Instance,Sol) :-

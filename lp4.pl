@@ -1,54 +1,6 @@
-:- module('lp4', [ kakuroSolve/2 ]).
+:- module('lp4', [ kakuroSolve/2, schedulingSolve/2 ]).
 :- use_module('./beePlaygound/bee/bApplications/auxs/auxRunExpr',[runExprMin/5,runExpr/5, decodeIntArray/2]).
-% Testing
-
-%should pass
-test_instance(1,Instance,Sol) :-
-    Sol = [10=[6,4],9=[3,6]],
-    Instance = [10=[I1,I2],9=[I3,I4]].
-
-test_instance(5,Instance,Solution) :-
-    Solution = [1,2,3,4,5,6],
-    Instance = schedule(6,[c(1,2),c(4,5)]).
-
-%should fail
-test_instance(2,Instance,Sol) :-
-    Sol = [10=[6,4],9=[3,2]],
-    Instance = [10=[I1,I2],9=[I3,I1]].
-
-test_instance(3,Instance,Sol) :-
-    Sol = [10=[5,5],9=[3,6]],
-    Instance = [10=[I1,I2],9=[I3,I1]].
-
-test_instance(4,Instance,Sol) :-
-    Sol = [10=[4,6],9=[3,6]],
-    Instance = [10=[I1,I2],9=[I3,I1]].
-
-test_instance(6,Instance,Solution) :-
-    Solution = [1,1,3,4,5,6],
-    Instance = schedule(6,[c(1,2),c(4,5)]).
-
-% test set
-test_set(1) :-
-    test_instance(1,I1,S1),
-    kakuroVerify(I1,S1),
-    test_instance(2,I2,S2),
-    \+ kakuroVerify(I2,S2),
-    test_instance(3,I3,S3),
-    \+ kakuroVerify(I3,S3),
-    test_instance(4,I4,S4),
-    \+ kakuroVerify(I4,S4).
-
-test_set(2) :-
-    test_instance(5,I1,S1),
-    schedulingVerify(I1,S1),
-    test_instance(6,I2,S2),
-    \+ schedulingVerify(I2,S2).
-
-% test_run
-
-test_run(1,S) :-
-    schedulingSolve(schedule(4,[c(1,2)]),S).
+# :- use_module('/home/niv/Programs/plsatsolver_src/satsolver/satsolver').
 
 %kakuroVerify(Instance, Solution)
 
@@ -118,14 +70,10 @@ decodeK([Hint = Mblock | Tm],[Hint = Sdecoded | Ts]) :-
 % kakuroSolve(Instance,Solution)
 
 kakuroSolve(Instance,Solution) :-
-    writef('%w,\n',[Instance]),flush_output,
     runExpr(Instance,Solution,
         lp4:kakuroEncode,
         lp4:kakuroDecode,
         lp4:kakuroVerify).
-
-    
-
     
 %% schedulingVerify(Instance, Solution) 
 
@@ -165,15 +113,12 @@ schedulingEncode(Instance,Map,Constraints) :-
     Instance = schedule(NExams, Conflicts),
     NExams > 0,
     length(Timeslots,NExams),
-    Map = map(Timeslots),
-    build_all_timeslots(NExams,Timeslots,C0),
+    Map = Timeslots,                                %Create the map
+    build_all_timeslots(NExams,Timeslots,C0),       %All timeslots are numbers from 1 to Nexams
     build_conflict_pairs(Timeslots,Conflicts,C1),
-    writef('%w,\n',[C0]),flush_output,
-    writef('%w,\n',[C1]),flush_output,
     append(C0,C1,Constraints).
 
-
-%schedulingDecode(Map,Solution) 
+%schedulingDecode(Map,Solution)
 
 schedulingDecode(Map,Solution) :-
     bDecode:decodeIntArray(Map,Solution).
@@ -181,7 +126,6 @@ schedulingDecode(Map,Solution) :-
 %schedulingSolve(Instance,Solution)
 
 schedulingSolve(Instance,Solution) :-
-    writef('%w,\n',[Instance]),flush_output,
     runExpr(Instance,Solution,
         lp4:schedulingEncode,
         lp4:schedulingDecode,
